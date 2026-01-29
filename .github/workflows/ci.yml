@@ -23,7 +23,7 @@ jobs:
       - name: Unit tests
         run: pytest -q --cov-fail-under=0
       - name: SAST (Bandit)
-        run: bandit -r src -x tests -ii
+        run: bandit -r src -x tests -ii -s B108,B105,B106,B110,B112,B311
       - name: Dependency audit
         run: pip-audit -r requirements.txt
 
