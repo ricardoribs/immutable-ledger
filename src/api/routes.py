@@ -4,7 +4,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
-from jose import jwt, JWTError
+import jwt
+from jwt import PyJWTError
 from io import BytesIO
 import base64
 import qrcode
@@ -144,7 +145,7 @@ async def refresh_token(
     accept_language = request.headers.get("accept-language", "")
     try:
         payload = jwt.decode(data.refresh_token, security.SECRET_KEY, algorithms=[security.ALGORITHM])
-    except JWTError:
+    except PyJWTError:
         raise HTTPException(status_code=401, detail="Refresh token invalido")
 
     if payload.get("type") != "refresh":

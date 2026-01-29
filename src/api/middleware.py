@@ -2,7 +2,7 @@ from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.concurrency import run_in_threadpool
 from fastapi import Request
 from fastapi.responses import JSONResponse
-from jose import jwt as jose_jwt
+import jwt
 
 from src.infra.cache import cache
 from src.infra.database import SessionLocal
@@ -73,7 +73,15 @@ class LedgerMiddleware(BaseHTTPMiddleware):
         if auth.startswith("Bearer "):
             token = auth.split(" ", 1)[1].strip()
             try:
-                claims = jose_jwt.get_unverified_claims(token)
+                claims = jwt.decode(
+                    token,
+                    options={
+                        "verify_signature": False,
+                        "verify_exp": False,
+                        "verify_nbf": False,
+                        "verify_aud": False,
+                    },
+                )
                 sub = claims.get("sub")
                 if sub and str(sub).isdigit():
                     user_id = int(sub)

@@ -34,7 +34,7 @@ websockets==16.0
 passlib[bcrypt]
 requests
 bcrypt==4.0.1
-python-jose[cryptography]
+PyJWT[crypto]==2.10.1
 python-multipart
 pyotp
 fpdf2

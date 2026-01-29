@@ -1,6 +1,7 @@
 from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
-from jose import jwt, JWTError
+import jwt
+from jwt import PyJWTError
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy import select
 from sqlalchemy.orm import selectinload
@@ -45,7 +46,7 @@ async def get_current_account(
             # Se Redis cair, nao trava tudo (dev-friendly). Em prod, pode fail-close em rotas sensiveis.
             pass
 
-    except (JWTError, ValueError, TypeError):
+    except (PyJWTError, ValueError, TypeError):
         raise credentials_exception
 
     stmt_sess = select(security_models.Session).where(security_models.Session.jti == str(jti))

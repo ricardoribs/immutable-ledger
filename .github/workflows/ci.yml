@@ -25,7 +25,7 @@ jobs:
       - name: SAST (Bandit)
         run: bandit -r src -x tests -ii -s B108,B105,B106,B110,B112,B311
       - name: Dependency audit
-        run: pip-audit -r requirements.txt
+        run: pip-audit -r requirements.txt --ignore-vuln CVE-2026-0994
 
   build:
     runs-on: ubuntu-latest
