@@ -1,0 +1,17 @@
+﻿name: "ledger_dbt"
+version: "1.0.0"
+config-version: 2
+
+profile: "ledger_dbt"
+
+models:
+  ledger_dbt:
+    staging:
+      +materialized: view
+    marts:
+      +materialized: table
+    +materialized: view
+
+snapshots:
+  ledger_dbt:
+    +target_schema: dw

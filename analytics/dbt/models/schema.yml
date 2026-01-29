@@ -1,0 +1,72 @@
+﻿version: 2
+
+models:
+  - name: stg_users
+    tests:
+      - unique:
+          column_name: id
+      - not_null:
+          column_name: id
+
+  - name: stg_accounts
+    tests:
+      - unique:
+          column_name: id
+      - not_null:
+          column_name: id
+
+  - name: stg_transactions
+    tests:
+      - unique:
+          column_name: id
+      - not_null:
+          column_name: id
+
+  - name: stg_postings
+    tests:
+      - unique:
+          column_name: id
+      - not_null:
+          column_name: id
+
+  - name: dim_customer
+    tests:
+      - unique:
+          column_name: user_id
+      - not_null:
+          column_name: user_id
+
+  - name: dim_account
+    tests:
+      - unique:
+          column_name: account_id
+      - not_null:
+          column_name: account_id
+      - relationships:
+          to: ref('dim_customer')
+          field: user_id
+
+  - name: fact_transactions
+    tests:
+      - not_null:
+          column_name: transaction_id
+      - relationships:
+          to: ref('dim_account')
+          field: account_id
+      - accepted_values:
+          column_name: operation_type
+          values: ['DEPOSIT', 'WITHDRAW', 'TRANSFER', 'PIX']
+
+  - name: fact_postings
+    tests:
+      - not_null:
+          column_name: posting_id
+      - relationships:
+          to: ref('fact_transactions')
+          field: transaction_id
+
+  - name: customer_segments
+    tests:
+      - accepted_values:
+          column_name: segment
+          values: ['high_value', 'active', 'occasional', 'inactive']

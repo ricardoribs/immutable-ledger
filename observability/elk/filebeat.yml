@@ -1,0 +1,11 @@
+filebeat.inputs:
+  - type: filestream
+    enabled: true
+    paths:
+      - /var/log/ledger/app.log
+    parsers:
+      - ndjson:
+          target: ""
+
+output.logstash:
+  hosts: ["logstash:5044"]

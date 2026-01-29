@@ -1,0 +1,10 @@
+[run]
+source =
+    src/core
+    src/domain/security
+    src/domain/fraud
+    src/domain/ledger/models.py
+omit =
+    src/infra/*
+    src/main.py
+    src/api/*

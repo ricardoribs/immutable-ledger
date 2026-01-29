@@ -1,0 +1,35 @@
+﻿version: 2
+
+sources:
+  - name: dw
+    schema: dw
+    tables:
+      - name: users
+      - name: accounts
+      - name: transactions_p
+      - name: postings_p
+      - name: kyc_profiles
+
+models:
+  - name: stg_users
+    description: "Usuarios base extraidos do warehouse."
+  - name: stg_accounts
+    description: "Contas base extraidas do warehouse."
+  - name: stg_transactions
+    description: "Transacoes base extraidas do warehouse."
+  - name: stg_postings
+    description: "Postings base extraidos do warehouse."
+  - name: stg_kyc_profiles
+    description: "Status de KYC por usuario."
+  - name: dim_customer
+    description: "Dimensao de clientes."
+  - name: dim_account
+    description: "Dimensao de contas."
+  - name: fact_transactions
+    description: "Fato de transacoes."
+  - name: fact_postings
+    description: "Fato de postings."
+  - name: fact_daily_kpis
+    description: "KPIs diarios."
+  - name: customer_segments
+    description: "Segmentacao simples de clientes."

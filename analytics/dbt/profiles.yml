@@ -1,0 +1,11 @@
+ledger_dbt:
+  target: dev
+  outputs:
+    dev:
+      type: postgres
+      host: warehouse_db
+      user: postgres
+      password: postgres
+      port: 5433
+      dbname: warehouse
+      schema: public

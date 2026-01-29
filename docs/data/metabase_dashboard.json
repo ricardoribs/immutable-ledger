@@ -1,0 +1,45 @@
+﻿{
+  "name": "LuisBank - Data Overview",
+  "description": "Dashboard base para KPIs do LuisBank",
+  "pages": [
+    {
+      "name": "Visao Geral",
+      "cards": [
+        {
+          "title": "KPIs Diarios",
+          "query": "select * from fact_daily_kpis order by tx_date desc"
+        },
+        {
+          "title": "Ticket Medio por Operacao",
+          "query": "select operation_type, avg(amount) as avg_amount from fact_transactions group by operation_type"
+        },
+        {
+          "title": "Top Clientes por Saldo",
+          "query": "select user_id, sum(balance) as total_balance from dim_account group by user_id order by total_balance desc limit 10"
+        }
+      ]
+    },
+    {
+      "name": "Segmentacao",
+      "cards": [
+        {
+          "title": "Distribuicao de Segmentos",
+          "query": "select segment, count(*) as total from customer_segments group by segment"
+        }
+      ]
+    },
+    {
+      "name": "Qualidade",
+      "cards": [
+        {
+          "title": "Checks de Qualidade",
+          "query": "select * from dw.dq_checks order by run_at desc limit 20"
+        },
+        {
+          "title": "Eventos CDC",
+          "query": "select * from dw.cdc_events order by captured_at desc limit 20"
+        }
+      ]
+    }
+  ]
+}
