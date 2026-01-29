@@ -3,6 +3,11 @@
 ## Visão geral
 O **LuisBank** é uma plataforma de banco digital com **ledger imutável**, serviços de core banking, camada regulatória e observabilidade completa. O projeto integra API, frontend institucional, serviços de segurança/compliance e infraestrutura de dados para operações financeiras de alta confiabilidade.
 
+## Interface (capturas da plataforma)
+![LuisBank — Login](docs/images/luisbank-login.png)
+![LuisBank — Portal institucional](docs/images/luisbank-institucional.png)
+![LuisBank — Dashboard operacional](docs/images/luisbank-dashboard.png)
+
 ## Escopo funcional (visão completa)
 ### Core Banking & Ledger
 - **Contas** (corrente, digital, poupança, investimento) com saldo, saldo bloqueado e limite de cheque especial.
