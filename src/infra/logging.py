@@ -16,8 +16,13 @@ class TraceIdFilter(logging.Filter):
 def configure_logging():
     log_level = os.getenv("LOG_LEVEL", "INFO").upper()
     log_dir = os.getenv("LOG_DIR", "/app/logs")
-    os.makedirs(log_dir, exist_ok=True)
-    log_path = os.path.join(log_dir, "app.log")
+    try:
+        os.makedirs(log_dir, exist_ok=True)
+        log_path = os.path.join(log_dir, "app.log")
+    except OSError:
+        fallback_dir = os.getenv("LOG_DIR_FALLBACK", "/tmp/immutable-ledger-logs")
+        os.makedirs(fallback_dir, exist_ok=True)
+        log_path = os.path.join(fallback_dir, "app.log")
 
     formatter = jsonlogger.JsonFormatter(
         "%(asctime)s %(levelname)s %(name)s %(message)s %(trace_id)s"
