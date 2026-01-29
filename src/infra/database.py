@@ -6,7 +6,7 @@ import os
 from sqlalchemy import create_engine, text
 from sqlalchemy.ext.asyncio import AsyncSession, create_async_engine
 from sqlalchemy.orm import declarative_base, sessionmaker
-from sqlalchemy.pool import NullPool
+from sqlalchemy.pool import NullPool, StaticPool
 
 from src.core.config import settings
 
@@ -26,7 +26,10 @@ _async_connect_args = {}
 _async_poolclass = None
 if settings.DATABASE_URL.startswith("sqlite+aiosqlite://"):
     _async_connect_args = {"check_same_thread": False, "timeout": 30}
-    _async_poolclass = NullPool
+    if "PYTEST_CURRENT_TEST" in os.environ or "test.db" in settings.DATABASE_URL:
+        _async_poolclass = StaticPool
+    else:
+        _async_poolclass = NullPool
 
 async_engine = create_async_engine(
     settings.DATABASE_URL,  # ex: postgresql+asyncpg://... or postgresql+psycopg://...
@@ -73,7 +76,10 @@ _sync_connect_args = {}
 _sync_poolclass = None
 if SYNC_DATABASE_URL.startswith("sqlite://"):
     _sync_connect_args = {"check_same_thread": False, "timeout": 30}
-    _sync_poolclass = NullPool
+    if "PYTEST_CURRENT_TEST" in os.environ or "test.db" in SYNC_DATABASE_URL:
+        _sync_poolclass = StaticPool
+    else:
+        _sync_poolclass = NullPool
 
 sync_engine = create_engine(
     SYNC_DATABASE_URL,
