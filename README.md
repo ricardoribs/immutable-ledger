@@ -12,6 +12,7 @@ O **LuisBank** é uma plataforma de banco digital com **ledger imutável**, serv
 ### Core Banking & Ledger
 - **Contas** (corrente, digital, poupança, investimento) com saldo, saldo bloqueado e limite de cheque especial.
 - **Ledger append-only** com trilha de auditoria e encadeamento por hash (sequência, `prev_hash`, `record_hash`).
+- **Integridade automática do ledger** com verificação periódica e alertas operacionais.
 - **Transações**: depósito, saque, transferência interna, PIX.
 - **Postings** contábeis (débito/crédito) com reconciliação baseada em soma de lançamentos.
 - **Extrato** e saldo em tempo real com cache de leitura.
@@ -46,6 +47,7 @@ O **LuisBank** é uma plataforma de banco digital com **ledger imutável**, serv
 - **Tracing** com Jaeger.
 - **Logs centralizados** (Elastic + Logstash + Kibana).
 - **Alertas** (Alertmanager) e roteamento para canais externos.
+- **SLOs operacionais** documentados em `docs/slo.md`.
 
 ### Dados & Analytics
 - **Airflow** para pipelines.
@@ -104,6 +106,17 @@ Quando `SEED_DEV=true`:
 - **Email**: `dev@luisbank.local`
 - **Senha**: `dev123`
 - **Conta**: `0001-0`
+
+## Segurança e ambientes
+- `STRICT_SECURITY=true` exige `SECRET_KEY` e `ENCRYPTION_KEY` válidos e falha rápido se ausentes.
+- Em dev, valores ausentes geram chaves temporárias para facilitar bootstrap local.
+
+## CI/CD e migrações
+- O pipeline executa migração controlada via Job (K8s) antes do deploy.
+- Consulte `docs/deploy.md` para detalhes.
+
+## Trade-offs
+Decisões arquiteturais e riscos conhecidos em `docs/tradeoffs.md`.
 
 ## Principais regras de negócio
 - Ledger **append-only**: updates/deletes são bloqueados via hooks.
