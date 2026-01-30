@@ -4,6 +4,7 @@ import pyotp
 import pytest
 
 from sqlalchemy import delete, select, text
+from sqlalchemy.exc import IntegrityError
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from src.domain.ledger import schemas, services, models
@@ -243,6 +244,60 @@ async def test_integrity_failure_detected(db_session: AsyncSession):
 
     res = await services.LedgerService.verify_integrity(db_session)
     assert res["ok"] is False
+
+
+@pytest.mark.asyncio
+async def test_integrity_postings_imbalance_detected(db_session: AsyncSession):
+    await _cleanup(db_session)
+    acc = await services.LedgerService.create_account(db_session, _account_payload("015"))
+
+    deposit = schemas.TransactionCreate(
+        account_id=acc.id,
+        amount=50.0,
+        type="DEPOSIT",
+        idempotency_key="idem-dep-015",
+    )
+    tx = await services.LedgerService.create_transaction(db_session, deposit, otp=None)
+
+    db_session.add(models.Posting(transaction_id=tx.id, account_id=acc.id, amount=1.0))
+    await db_session.commit()
+    db_session.expire_all()
+
+    res = await services.LedgerService.verify_integrity(db_session)
+    assert res["ok"] is False
+    assert res.get("reason") == "POSTINGS_IMBALANCE"
+
+
+@pytest.mark.asyncio
+async def test_partial_failure_rolls_back(db_session: AsyncSession, monkeypatch):
+    await _cleanup(db_session)
+    acc = await services.LedgerService.create_account(db_session, _account_payload("016"))
+
+    deposit = schemas.TransactionCreate(
+        account_id=acc.id,
+        amount=75.0,
+        type="DEPOSIT",
+        idempotency_key="idem-dep-016",
+    )
+
+    original_commit = db_session.commit
+    calls = {"n": 0}
+
+    async def boom_commit():
+        calls["n"] += 1
+        if calls["n"] == 1:
+            raise IntegrityError("stmt", {}, Exception("boom"))
+        return await original_commit()
+
+    monkeypatch.setattr(db_session, "commit", boom_commit)
+
+    with pytest.raises(IntegrityError):
+        await services.LedgerService.create_transaction(db_session, deposit, otp=None)
+
+    res_tx = await db_session.execute(select(models.Transaction))
+    res_post = await db_session.execute(select(models.Posting))
+    assert res_tx.scalars().all() == []
+    assert res_post.scalars().all() == []
 
 
 @pytest.mark.asyncio
