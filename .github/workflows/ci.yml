@@ -57,7 +57,22 @@ jobs:
           else
             echo "k8s/secrets.yaml ausente. Skip."
           fi
-          kubectl apply -f k8s/
+          kubectl delete job ledger-db-migrate -n ledger --ignore-not-found
+          kubectl apply -f k8s/jobs/db-migrate-job.yaml
+          kubectl wait --for=condition=complete job/ledger-db-migrate -n ledger --timeout=300s
+          kubectl logs job/ledger-db-migrate -n ledger
+          kubectl apply -f k8s/api-deployment.yaml \
+            -f k8s/encryption-config.yaml \
+            -f k8s/hpa.yaml \
+            -f k8s/ingress.yaml \
+            -f k8s/kafka-statefulset.yaml \
+            -f k8s/network-policy.yaml \
+            -f k8s/pod-security-policy.yaml \
+            -f k8s/postgres-statefulset.yaml \
+            -f k8s/rbac.yaml \
+            -f k8s/redis-deployment.yaml \
+            -f k8s/strategy-examples.yaml \
+            -f k8s/worker-deployment.yaml
 
   deploy-prod:
     runs-on: ubuntu-latest
@@ -71,4 +86,19 @@ jobs:
         run: |
           echo "$KUBECONFIG_B64" | base64 -d > kubeconfig
           export KUBECONFIG=$PWD/kubeconfig
-          kubectl apply -f k8s/
+          kubectl delete job ledger-db-migrate -n ledger --ignore-not-found
+          kubectl apply -f k8s/jobs/db-migrate-job.yaml
+          kubectl wait --for=condition=complete job/ledger-db-migrate -n ledger --timeout=300s
+          kubectl logs job/ledger-db-migrate -n ledger
+          kubectl apply -f k8s/api-deployment.yaml \
+            -f k8s/encryption-config.yaml \
+            -f k8s/hpa.yaml \
+            -f k8s/ingress.yaml \
+            -f k8s/kafka-statefulset.yaml \
+            -f k8s/network-policy.yaml \
+            -f k8s/pod-security-policy.yaml \
+            -f k8s/postgres-statefulset.yaml \
+            -f k8s/rbac.yaml \
+            -f k8s/redis-deployment.yaml \
+            -f k8s/strategy-examples.yaml \
+            -f k8s/worker-deployment.yaml

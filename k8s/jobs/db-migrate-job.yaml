@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: Job
+metadata:
+  name: ledger-db-migrate
+  namespace: ledger
+spec:
+  backoffLimit: 2
+  template:
+    metadata:
+      labels:
+        app: ledger-db-migrate
+    spec:
+      restartPolicy: Never
+      containers:
+        - name: db-migrate
+          image: ledger-api:latest
+          command: ["python", "scripts/db_migrate.py"]
+          env:
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: database_url
+            - name: REDIS_URL
+              value: redis://ledger-redis:6379/0
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: secret_key
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: encryption_key
+            - name: STRICT_SECURITY
+              value: "true"
+            - name: SEED_DEV
+              value: "false"
