@@ -1,8 +1,8 @@
-﻿# CDC via WAL (replicacao logica)
+# CDC via WAL (replicação lógica)
 
-Visao
+Visão
 - Fonte: Postgres ledger_db
-- Metodo: replication slot + logical decoding
+- Método: replication slot + logical decoding
 - Destino: warehouse_db ou fila (Kafka)
 
 Script base
@@ -25,8 +25,8 @@ Passos (exemplo conceitual)
 - Para gravar no DW:
   - CDC_APPLY=true
   - CDC_WAREHOUSE_DSN="host=warehouse_db dbname=warehouse user=postgres password=postgres"
-  - CDC_OUTPUT_PLUGIN=wal2json (se disponivel)
+  - CDC_OUTPUT_PLUGIN=wal2json (se disponível)
 
 Notas
-- Em ambiente real: garantir retention de WAL e monitorar lag
+- Em ambiente real: garantir retenção de WAL e monitorar lag
 - CDC facilita near-real-time para dashboard e antifraude

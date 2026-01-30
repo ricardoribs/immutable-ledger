@@ -1,6 +1,6 @@
 ﻿# LuisBank Data Engineering - Guia Completo
 
-Este guia descreve a entrega final da camada de engenharia de dados do LuisBank: geracao de carteira fake, ETL, modelagem dbt, snapshots, CDC, EDA e dashboards.
+Este guia descreve a entrega final da camada de engenharia de dados do LuisBank: geração de carteira fake, ETL, modelagem dbt, snapshots, CDC, EDA e dashboards.
 
 ---
 
@@ -11,7 +11,7 @@ Comando:
 python scripts/generate_fake_wallet.py --users 500 --days 180 --max-daily-txs 4 --export-dir analytics/exports --seed 42
 ```
 
-Saidas geradas:
+Saídas geradas:
 - analytics/exports/users.csv
 - analytics/exports/accounts.csv
 - analytics/exports/transactions.csv
@@ -47,7 +47,7 @@ docker compose run --rm dbt
 Modelos:
 - staging: stg_users, stg_accounts, stg_transactions, stg_postings, stg_kyc_profiles
 - marts: dim_customer, dim_account, fact_transactions, fact_postings, fact_daily_kpis
-- segmentacao: customer_segments
+- segmentação: customer_segments
 
 ---
 
@@ -106,7 +106,7 @@ Arquivo:
 
 ---
 
-## 9) Documentacao para GitHub
+## 9) Documentação para GitHub
 
 Arquivos:
 - docs/data/README.md
@@ -121,7 +121,7 @@ Arquivos:
 
 ## Checklist de entrega
 
-- [x] Geracao de dados fake
+- [x] Geração de dados fake
 - [x] ETL incremental com watermark
 - [x] DW particionado
 - [x] dbt staging + marts
@@ -129,4 +129,4 @@ Arquivos:
 - [x] CDC via WAL
 - [x] EDA notebook
 - [x] Dashboard Metabase
-- [x] Documentacao completa
+- [x] Documentação completa

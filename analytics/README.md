@@ -1,14 +1,14 @@
 ﻿# LuisBank Data Engineering
 
 Objetivo
-- Gerar uma carteira fake de clientes e transacoes
-- Extrair dados do core bancario para o warehouse
+- Gerar uma carteira fake de clientes e transações
+- Extrair dados do core bancário para o warehouse
 - Modelar dados com dbt (staging + marts)
-- Documentar KPI, qualidade e segmentacao
+- Documentar KPI, qualidade e segmentação
 
 Fluxo
-1) Geracao de dados fake (scripts/generate_fake_wallet.py)
-2) ETL diario via Airflow (analytics/airflow/dags/etl_ledger.py)
+1) Geração de dados fake (scripts/generate_fake_wallet.py)
+2) ETL diário via Airflow (analytics/airflow/dags/etl_ledger.py)
 3) Modelagem dbt (analytics/dbt/models)
 4) Consultas e dashboards (Metabase/Grafana)
 5) EDA com notebook (analytics/notebooks/eda.ipynb)
@@ -23,8 +23,8 @@ Rodar ETL (Airflow)
 - DAG: ledger_etl
 - Carrega dados do core (ledger_db) para o warehouse (warehouse_db)
 - Cria tabelas em schema dw
-- Incremental: transacoes/postings/kyc por watermark (dw.etl_state)
-- Particionamento real por mes (dw.transactions_p, dw.postings_p)
+- Incremental: transações/postings/kyc por watermark (dw.etl_state)
+- Particionamento real por mês (dw.transactions_p, dw.postings_p)
 
 Rodar dbt
 - Exemplo (container dbt do docker-compose):
@@ -44,13 +44,13 @@ CDC
 
 Outputs esperados
 - Tabelas DW: dw.users, dw.accounts, dw.transactions_p, dw.postings_p, dw.kyc_profiles, dw.cdc_events
-- Dimensoes: dim_customer, dim_account
+- Dimensões: dim_customer, dim_account
 - Fatos: fact_transactions, fact_postings, fact_daily_kpis
 - Segmentos: customer_segments
 - Snapshots: dw.account_balance_snapshot
 
 Qualidade de dados
-- dw.dq_checks armazena resultados de checks basicos
+- dw.dq_checks armazena resultados de checks básicos
 - Verificar postings_balance, orphan_postings, accounts_without_users
 
 Dashboards

@@ -1,29 +1,29 @@
 ﻿# Metabase Dashboard - LuisBank Data
 
-Sugestao de dashboard
+Sugestão de dashboard
 
-1) KPIs Diarios
+1) KPIs Diários
 - Fonte: fact_daily_kpis
 - Campos: tx_date, total_transactions, total_amount
 
-2) Ticket Medio por Operacao
+2) Ticket Médio por Operação
 - Fonte: fact_transactions
 - Campos: operation_type, avg(amount)
 
 3) Top Clientes por Saldo
 - Fonte: dim_account (sum(balance) por user_id)
 
-4) Segmentacao
+4) Segmentação
 - Fonte: customer_segments
 - Campos: segment, count(user_id)
 
 5) Qualidade de Dados
 - Fonte: dw.dq_checks
-- Ultimos checks (status pass/fail)
+- Últimos checks (status pass/fail)
 - Eventos CDC
   - Fonte: dw.cdc_events
 
-Importacao via script
+Importação via script
 - METABASE_URL=http://localhost:3001
 - METABASE_USER=admin
 - METABASE_PASSWORD=admin

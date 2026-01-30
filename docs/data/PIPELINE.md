@@ -1,9 +1,9 @@
 ﻿# Pipeline
 
 Resumo
-- Fonte: ledger_db (core bancario)
+- Fonte: ledger_db (core bancário)
 - Destino: warehouse_db (schema dw)
-- Orquestracao: Airflow (DAG ledger_etl)
+- Orquestração: Airflow (DAG ledger_etl)
 - Modelagem: dbt
 
 Passos
@@ -24,7 +24,7 @@ Passos
    - orphan_postings (postings sem transaction)
    - accounts_without_users (accounts sem users)
    - postings_vs_balance (saldo vs soma postings)
-   - transactions_without_postings (transacao sem posting)
+   - transactions_without_postings (transação sem posting)
 
 Incremental (futuro)
 - migrar para cargas incrementais por timestamp
