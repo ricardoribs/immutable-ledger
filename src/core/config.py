@@ -1,4 +1,5 @@
 import os
+import secrets
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -11,14 +12,15 @@ class Settings:
     )
     
     REDIS_URL = os.getenv("REDIS_URL", "redis://ledger_redis:6379/0")
-    
-    SECRET_KEY = os.getenv("SECRET_KEY", "CHANGEME_SECRET_KEY")
+
+    STRICT_SECURITY = os.getenv("STRICT_SECURITY", "false").lower() in {"1", "true", "yes"}
+
+    SECRET_KEY = os.getenv("SECRET_KEY")
     ALGORITHM = "HS256"
     ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "15"))
     REFRESH_TOKEN_EXPIRE_DAYS = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", "7"))
     
-    # Garante que nunca seja None
-    ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY", "CHANGEME_ENCRYPTION_KEY")
+    ENCRYPTION_KEY = os.getenv("ENCRYPTION_KEY")
 
     VAULT_ADDR = os.getenv("VAULT_ADDR")
     VAULT_TOKEN = os.getenv("VAULT_TOKEN")
@@ -49,5 +51,20 @@ class Settings:
     PUSH_GATEWAY_URL = os.getenv("PUSH_GATEWAY_URL", "http://push_gateway:6003/push")
     SLACK_WEBHOOK_URL = os.getenv("SLACK_WEBHOOK_URL", "http://slack_mock:6004/slack")
     PAGERDUTY_WEBHOOK_URL = os.getenv("PAGERDUTY_WEBHOOK_URL", "http://pagerduty_mock:6005/pagerduty")
+    ALERT_ROUTER_URL = os.getenv("ALERT_ROUTER_URL", "http://alert_router:5001/alert")
+    LEDGER_INTEGRITY_INTERVAL_SECONDS = int(os.getenv("LEDGER_INTEGRITY_INTERVAL_SECONDS", "300"))
+
+    _INVALID_PLACEHOLDERS = {"CHANGEME_SECRET_KEY", "CHANGEME_ENCRYPTION_KEY", "", None}
+
+    if STRICT_SECURITY:
+        if SECRET_KEY in _INVALID_PLACEHOLDERS:
+            raise RuntimeError("SECRET_KEY ausente ou insegura em STRICT_SECURITY")
+        if ENCRYPTION_KEY in _INVALID_PLACEHOLDERS:
+            raise RuntimeError("ENCRYPTION_KEY ausente ou insegura em STRICT_SECURITY")
+
+    if SECRET_KEY in _INVALID_PLACEHOLDERS:
+        SECRET_KEY = secrets.token_urlsafe(48)
+    if ENCRYPTION_KEY in _INVALID_PLACEHOLDERS:
+        ENCRYPTION_KEY = secrets.token_urlsafe(48)
 
 settings = Settings()

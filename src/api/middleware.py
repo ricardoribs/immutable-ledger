@@ -8,6 +8,7 @@ from src.infra.cache import cache
 from src.infra.database import SessionLocal
 from src.domain.ledger.models import AuditLog
 from src.infra.metrics import REQUEST_LATENCY, ERRORS
+from src.core.config import settings
 
 import logging
 import time
@@ -40,7 +41,11 @@ class LedgerMiddleware(BaseHTTPMiddleware):
                         content={"detail": "Global Rate Limit Exceeded. Acalme-se, hacker."},
                     )
             except Exception as e:
-                # Se Redis cair, nao derruba a API
+                if settings.STRICT_SECURITY:
+                    return JSONResponse(
+                        status_code=503,
+                        content={"detail": "Rate limit indisponivel. Tente novamente."},
+                    )
                 logger.error(f"Rate limit indisponivel (redis): {e}")
 
         # ==========================

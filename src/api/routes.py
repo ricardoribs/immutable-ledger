@@ -18,6 +18,7 @@ from src.domain.security import services as security_services
 from src.domain.security import models as security_models
 import secrets
 from src.infra.cache import cache
+from src.core.config import settings
 
 router = APIRouter()
 
@@ -41,8 +42,8 @@ async def login_access_token(
         if not allow:
             raise HTTPException(status_code=429, detail="Muitas tentativas. Aguarde 1 minuto.")
     except Exception:
-        # Se Redis cair, nao derruba login em dev
-        pass
+        if settings.STRICT_SECURITY:
+            raise HTTPException(status_code=503, detail="Rate limit indisponivel. Tente novamente.")
 
     account = await services.LedgerService.authenticate_account(db, form_data.username, form_data.password)
     if not account:

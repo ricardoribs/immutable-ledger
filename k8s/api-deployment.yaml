@@ -31,6 +31,13 @@ spec:
                 secretKeyRef:
                   name: ledger-secrets
                   key: secret_key
+            - name: ENCRYPTION_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: ledger-secrets
+                  key: encryption_key
+            - name: STRICT_SECURITY
+              value: "true"
             - name: OTEL_EXPORTER_OTLP_ENDPOINT
               value: http://jaeger-collector:4317
           resources:

@@ -63,6 +63,8 @@ class CacheService:
                 await self.redis.expire(key, window_seconds)
             return current <= limit
         except Exception:
+            if settings.STRICT_SECURITY:
+                return False
             return True
 
     # --- RATE LIMITING (SLIDING WINDOW) ---
@@ -78,6 +80,8 @@ class CacheService:
             _, _, count, _ = await pipe.execute()
             return count <= limit
         except Exception:
+            if settings.STRICT_SECURITY:
+                return False
             return True
 
     async def incr_with_expire(self, key: str, ttl_seconds: int) -> int:
