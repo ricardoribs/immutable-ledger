@@ -18,3 +18,8 @@
 1. Start a fresh Postgres container.
 2. Restore latest backup.
 3. Repoint `DATABASE_URL` and restart API and workers.
+
+## Alertas críticos
+- **Integridade do ledger:** `LedgerIntegrityFailed` ou `LedgerIntegrityStale`.
+- **Redis fora:** `RedisDown` (rate limit deve falhar fechado em produção).
+- **Banco fora:** `DatabaseDown`.
