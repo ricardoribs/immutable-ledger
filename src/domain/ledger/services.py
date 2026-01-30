@@ -1,5 +1,5 @@
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy import select, func
+from sqlalchemy import select, func, update
 from sqlalchemy.exc import IntegrityError
 from sqlalchemy.orm import selectinload
 from fastapi import HTTPException
@@ -113,19 +113,33 @@ class LedgerService:
         return sys_acc
 
     @staticmethod
+    def _ensure_double_entry(postings: list[models.Posting]) -> None:
+        total = to_decimal("0.00")
+        for posting in postings:
+            total = to_decimal(total + to_decimal(posting.amount))
+        if total != to_decimal("0.00"):
+            raise HTTPException(status_code=500, detail="Invariancia double-entry violada")
+
+    @staticmethod
     async def _compute_tx_hash(
         db: AsyncSession,
         tx: models.Transaction,
     ) -> tuple[int, str]:
-        stmt_seq = select(models.LedgerSequence).where(models.LedgerSequence.id == 1).with_for_update()
-        res_seq = await db.execute(stmt_seq)
-        seq_row = res_seq.scalar_one_or_none()
-        if not seq_row:
-            seq_row = models.LedgerSequence(id=1, value=0)
+        stmt_update = (
+            update(models.LedgerSequence)
+            .where(models.LedgerSequence.id == 1)
+            .values(value=models.LedgerSequence.value + 1)
+            .returning(models.LedgerSequence.value)
+        )
+        res_update = await db.execute(stmt_update)
+        seq_value = res_update.scalar_one_or_none()
+        if seq_value is None:
+            seq_row = models.LedgerSequence(id=1, value=1)
             db.add(seq_row)
             await db.flush()
-        seq_row.value += 1
-        sequence = seq_row.value
+            sequence = 1
+        else:
+            sequence = int(seq_value)
 
         stmt_prev = select(models.Transaction).where(models.Transaction.sequence == sequence - 1)
         res_prev = await db.execute(stmt_prev)
@@ -472,6 +486,7 @@ class LedgerService:
                 models.Posting(transaction_id=tx.id, account_id=data.account_id, amount=-amount_units),
                 models.Posting(transaction_id=tx.id, account_id=sys_acc.id, amount=amount_units),
             ]
+        LedgerService._ensure_double_entry(postings)
         db.add_all(postings)
 
         stmt_acc = select(models.Account).where(models.Account.id == data.account_id)
@@ -491,6 +506,9 @@ class LedgerService:
             if existing:
                 existing.idempotency_hit = True
                 return existing
+            raise
+        except Exception:
+            await db.rollback()
             raise
         await cache.delete_key(f"balance:{data.account_id}")
         if amount_units >= to_decimal(settings.AML_LARGE_TX_THRESHOLD):
@@ -581,10 +599,12 @@ class LedgerService:
         db.add(tx)
         await db.flush()
 
-        db.add_all([
+        postings = [
             models.Posting(transaction_id=tx.id, account_id=data.from_account_id, amount=-amount_units),
             models.Posting(transaction_id=tx.id, account_id=data.to_account_id, amount=amount_units),
-        ])
+        ]
+        LedgerService._ensure_double_entry(postings)
+        db.add_all(postings)
 
         if acc_from:
             acc_from.balance = to_decimal(acc_from.balance or 0) - amount_units
@@ -603,6 +623,9 @@ class LedgerService:
                 existing.idempotency_hit = True
                 return existing
             raise
+        except Exception:
+            await db.rollback()
+            raise
         await cache.delete_key(f"balance:{data.from_account_id}")
         await cache.delete_key(f"balance:{data.to_account_id}")
         if amount_units >= to_decimal(settings.AML_LARGE_TX_THRESHOLD):
@@ -615,11 +638,19 @@ class LedgerService:
 
     @staticmethod
     async def verify_integrity(db: AsyncSession) -> dict:
+        stmt_sum = select(
+            models.Posting.transaction_id,
+            func.coalesce(func.sum(models.Posting.amount), 0.0),
+        ).group_by(models.Posting.transaction_id)
+        res_sum = await db.execute(stmt_sum)
+        posting_sums = {tx_id: to_decimal(total) for tx_id, total in res_sum.all()}
         stmt = select(models.Transaction).order_by(models.Transaction.sequence.asc())
         res = await db.execute(stmt)
         txs = res.scalars().all()
         prev_hash = ""
         for tx in txs:
+            if posting_sums.get(tx.id, to_decimal("0.00")) != to_decimal("0.00"):
+                return {"ok": False, "tx_id": tx.id, "reason": "POSTINGS_IMBALANCE"}
             raw = "|".join([
                 str(tx.sequence),
                 str(tx.account_id),
@@ -631,7 +662,7 @@ class LedgerService:
             ])
             expected = hashlib.sha256(raw.encode("utf-8")).hexdigest()
             if tx.record_hash != expected or tx.prev_hash != prev_hash:
-                return {"ok": False, "tx_id": tx.id}
+                return {"ok": False, "tx_id": tx.id, "reason": "HASH_MISMATCH"}
             prev_hash = tx.record_hash
         return {"ok": True, "count": len(txs)}
 

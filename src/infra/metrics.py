@@ -29,3 +29,18 @@ TRANSACTION_COUNT = Counter(
     "Total transactions by type",
     ["operation_type"],
 )
+
+LEDGER_INTEGRITY_OK = Gauge(
+    "ledger_integrity_ok",
+    "Ledger integrity status (1=ok, 0=fail)",
+)
+
+LEDGER_INTEGRITY_LAST_RUN = Gauge(
+    "ledger_integrity_last_run_timestamp",
+    "Ledger integrity last check timestamp (epoch seconds)",
+)
+
+LEDGER_INTEGRITY_FAILURES = Counter(
+    "ledger_integrity_failures_total",
+    "Ledger integrity failures total",
+)

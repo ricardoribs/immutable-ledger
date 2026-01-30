@@ -15,6 +15,13 @@ groups:
           severity: critical
         annotations:
           summary: "Database down"
+      - alert: RedisDown
+        expr: redis_up == 0
+        for: 30s
+        labels:
+          severity: critical
+        annotations:
+          summary: "Redis down"
       - alert: HighErrorRate
         expr: sum(rate(app_errors_total[1m])) > 2
         for: 1m
@@ -50,3 +57,17 @@ groups:
           severity: high
         annotations:
           summary: "Fraud spike detected"
+      - alert: LedgerIntegrityFailed
+        expr: ledger_integrity_ok == 0
+        for: 1m
+        labels:
+          severity: critical
+        annotations:
+          summary: "Ledger integrity check failed"
+      - alert: LedgerIntegrityStale
+        expr: (time() - ledger_integrity_last_run_timestamp) > 600
+        for: 2m
+        labels:
+          severity: high
+        annotations:
+          summary: "Ledger integrity check is stale"

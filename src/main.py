@@ -32,6 +32,8 @@ from src.infra.metrics import TOTAL_BALANCE
 from src.infra.database import async_session
 from sqlalchemy import select, func
 from src.domain.ledger import models as ledger_models
+from src.domain.ledger.integrity import run_integrity_check
+from src.core.config import settings
 import asyncio
 
 try:
@@ -94,6 +96,14 @@ async def startup_event():
             await asyncio.sleep(30)
 
     asyncio.create_task(update_total_balance())
+
+    async def ledger_integrity_loop():
+        while True:
+            await run_integrity_check()
+            await asyncio.sleep(settings.LEDGER_INTEGRITY_INTERVAL_SECONDS)
+
+    if not os.getenv("PYTEST_CURRENT_TEST"):
+        asyncio.create_task(ledger_integrity_loop())
 
 
 @app.on_event("shutdown")

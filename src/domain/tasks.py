@@ -203,6 +203,7 @@ async def _run_ml_training():
         await MlService.train_churn(db)
 
 
+
 @celery_app.task
 def reconciliation_task():
     asyncio.run(_run_reconciliation())
